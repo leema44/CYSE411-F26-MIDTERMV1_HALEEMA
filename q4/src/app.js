@@ -42,7 +42,7 @@ function loadProfile() {
 
 
 function renderProfile(profile) {
-
+    const listEl = document.getElementById("notifications");
     listEl.innerHTML =""; //This will clear the list
     profile.forEach(msg => {  
         const li = document.createElement("li"); //this wpuld create list element for each notification
