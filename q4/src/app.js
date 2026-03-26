@@ -18,63 +18,62 @@ let currentProfile = null;
 -------------------------- */
 
 function loadProfile() {
+    try{ //try starts here 
+        const profile=JSONparse(jsonText);
+        if (typeof profile.userName !=="string") //checks if the userName is a string it not then it returns null, it does not execute anything inserted by the user at it could be a malicous code
+            return null;
+        if(!Array.isArray(profile.notifications)) //check is the notificaitons is arrray if it not then it return null but does not executre/process it, again because it could be a malicious code
+            return null;
+        const allStrings = profile.notifications.every(function(n){ //checks if all the elements in the notifications array is strings if not then returns null.
+            return typeof n == "string";})
+            if(!allStrings)
+                return null;
+            currentProfile = profile;
+            renderProfile(profile);
+        }
+        catch(e){ return null;} //catch, if there is an error it returns null which makes it safely fail
+       
+    }
 
-    const text = document.getElementById("profileInput").value;
-
-   
-    const profile = JSON.parse(text);
-
-    currentProfile = profile;
-
-    renderProfile(profile);
-}
 
 
-/* -------------------------
-   Render Profile
--------------------------- */
+// --------------------------
+
+
 
 function renderProfile(profile) {
 
-    
-    document.getElementById("username").innerHTML = profile.username;
-
-    const list = document.getElementById("notifications");
-    list.innerHTML = "";
-
-    for (let n of profile.notifications) {
-
-        const li = document.createElement("li");
-
-        
-        li.innerHTML = n;
-
-        list.appendChild(li);
-    }
+    listEl.innerHTML =""; //This will clear the list
+    profile.forEach(msg => {  
+        const li = document.createElement("li"); //this wpuld create list element for each notification
+        li.textContent = msg; // it will set the textConent of list element to notifiation message as it does not processed is as HTML which makes it safe, it would not matter what the malicious attacker inputs it would not execute it as code
+        listEl.appendChild(li); //this appends the list element to the orginal list 
+    })
 }
-
 
 /* -------------------------
    Browser Storage
 -------------------------- */
 
 function saveSession() {
-    localStorage.setItem("profile", JSON.stringify(currentProfile));
+    const session ={ //creats a session object with username and role from current profile- does not include the notifications as those could have malicious code
+        userName: currentProfile.userName,
+        role: currentProfile.role
+    };
+    localStorage.setItem("profile", JSON.stringify(session));
 
     alert("Session saved");
 }
 
 
-function loadSession() {
-
-    const stored = localStorage.getItem("profile");
-
-    if (stored) {
-
-        const profile = JSON.parse(stored);
-
-        currentProfile = profile;
-
-        renderProfile(profile);
-    }
-}
+function loadSession(){
+        const stored = localStorage.getItem("profile"); //cecks for the sessions stored in local storage
+        if (!stored)
+            return null;
+        const obj = JSON.parse(stored);
+        if (typeof obj.userName !=="string") //checks if the userName is string if not then reutnr null, it secures it as no malicious code would be executred
+            return null;
+        if (typeof obj.role !=="string") //checks if the user input is string if not then reutnr null, it secures it as no malicious code would be executred
+            return null;
+        return obj;
+}    
